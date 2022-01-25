@@ -1,7 +1,212 @@
 #include "./mechanics.h"
 
-
 void parietal_epithelial_mechanics( Cell* pCell, Phenotype& phenotype, double dt )
+{
+    static double R_a = parameters.doubles("R_a");  
+    static int idx_attached = pCell->custom_data.find_variable_index( "attached" ); 
+    static bool first_time = true;
+
+    static double x_min = microenvironment.mesh.bounding_box[0]; 
+	static double x_max = microenvironment.mesh.bounding_box[3]; 
+	static double x_diff = microenvironment.mesh.bounding_box[3] - microenvironment.mesh.bounding_box[0]; 
+
+	static double y_min = microenvironment.mesh.bounding_box[1]; 
+	static double y_max = microenvironment.mesh.bounding_box[4]; 
+	static double y_diff = microenvironment.mesh.bounding_box[4] - microenvironment.mesh.bounding_box[1]; 
+
+    // std::cout << "------ parietal_epithelial_mechanics" << std::endl;
+
+    double xpos = pCell->position[0];
+    double ypos = pCell->position[1];
+
+    if (!(pCell->custom_data[idx_attached]))
+    {
+        if (fabs(ypos) <  R_a)
+        {
+            pCell->custom_data[idx_attached] = 1;
+            // phenotype.motility.migration_speed = 0.0;
+		    // phenotype.motility.is_motile = false; 
+		    pCell->is_movable = false; 
+
+            return;
+        }
+    }
+    else  //  it is already attached
+    {
+            return;
+    }
+
+    // if (first_time) 
+    // {
+    //     std::cout << "------ parietal_epithelial_mechanics: ID = " << pCell->ID << ": " << xpos << ", " << ypos << "; " << "x_diff = " << x_diff << std::endl;
+    // }
+
+	// BM adhesion 
+		// is it time to detach (attachment lifetime)
+		// am I unattached by capable? 
+			// search through neighbors, find closest BM type agent 
+			// form adhesion 
+		// elastic adhesion 
+	
+	// plasto-elastic. 
+		// elastic: movement towards rest position 
+	
+	// static int nRP = 0; // "rest_position"
+	// std::vector<double> displacement = pCell->custom_data.vector_variables[nRP].value ; 
+
+    // adopted from update_motility_vector (in core/PhysiCell_cell.cpp)
+
+    // choose a uniformly random unit vector 
+    double temp_angle = 6.28318530717959 * UniformRandom();
+    double temp_phi = 3.1415926535897932384626433832795 * UniformRandom();
+    
+    double sin_phi = sin(temp_phi);
+    double cos_phi = cos(temp_phi);
+    
+    if( phenotype.motility.restrict_to_2D == true )
+    { 
+        sin_phi = 1.0; 
+        cos_phi = 0.0;
+    }
+    
+    std::vector<double> dvec; 
+    dvec.resize(3,0.0); 
+    dvec[0] = 0.0; 
+    dvec[1] = -1.0; 
+    dvec[2] = 0.0; //  assuming 2D model
+    
+    // if the update_bias_vector function is set, use it  
+    if( pCell->functions.update_migration_bias )
+    {
+        pCell->functions.update_migration_bias( pCell, phenotype, dt ); 
+    }
+    
+    phenotype.motility.motility_vector = phenotype.motility.migration_bias_direction; // motiltiy = bias_vector
+    phenotype.motility.motility_vector *= phenotype.motility.migration_bias; // motility = bias*bias_vector 
+
+    double one_minus_bias = 1.0 - phenotype.motility.migration_bias; 
+		
+    axpy( &(phenotype.motility.motility_vector), one_minus_bias, dvec ); // motility = (1-bias)*randvec + bias*bias_vector
+		
+    normalize( &(phenotype.motility.motility_vector) ); 
+		
+    phenotype.motility.motility_vector *= phenotype.motility.migration_speed;
+    pCell->update_motility_vector( dt );
+	return; 
+}
+
+void parietal_epithelial_mechanics_v1( Cell* pCell, Phenotype& phenotype, double dt )
+{
+    static double R_a = parameters.doubles("R_a");  
+    static int idx_attached = pCell->custom_data.find_variable_index( "attached" ); 
+    static bool first_time = true;
+
+    static double x_min = microenvironment.mesh.bounding_box[0]; 
+	static double x_max = microenvironment.mesh.bounding_box[3]; 
+	static double x_diff = microenvironment.mesh.bounding_box[3] - microenvironment.mesh.bounding_box[0]; 
+
+	static double y_min = microenvironment.mesh.bounding_box[1]; 
+	static double y_max = microenvironment.mesh.bounding_box[4]; 
+	static double y_diff = microenvironment.mesh.bounding_box[4] - microenvironment.mesh.bounding_box[1]; 
+
+    // std::cout << "------ parietal_epithelial_mechanics" << std::endl;
+
+    double xpos = pCell->position[0];
+    double ypos = pCell->position[1];
+
+    if (!(pCell->custom_data[idx_attached]))
+    {
+        if (fabs(ypos) <  R_a)
+        {
+            pCell->custom_data[idx_attached] = 1;
+            return;
+        }
+    }
+    else  //  it is already attached
+    {
+            return;
+    }
+
+    // if (first_time) 
+    // {
+    //     std::cout << "------ parietal_epithelial_mechanics: ID = " << pCell->ID << ": " << xpos << ", " << ypos << "; " << "x_diff = " << x_diff << std::endl;
+    // }
+
+	// BM adhesion 
+		// is it time to detach (attachment lifetime)
+		// am I unattached by capable? 
+			// search through neighbors, find closest BM type agent 
+			// form adhesion 
+		// elastic adhesion 
+	
+	// plasto-elastic. 
+		// elastic: movement towards rest position 
+	
+	// static int nRP = 0; // "rest_position"
+	// std::vector<double> displacement = pCell->custom_data.vector_variables[nRP].value ; 
+
+    // int ix = (int)(((xpos - x_min)/x_diff) * NXG);
+    // // int iy = 75 - (int)(((ypos - y_min)/y_diff) * 75);
+    // int iy = (int)(((ypos - y_min)/y_diff) * NYG);
+
+    // if (first_time) 
+    // {
+    //     std::cout << " ------ ID="<<pCell->ID <<": ix,iy= " << ix << "," << iy << "; dx,dy = " << pbm_grad_x[iy][ix] <<"," << pbm_grad_y[iy][ix] << std::endl;
+    //     first_time = false;
+    // }
+
+    // static double dscale = 0.1;
+    // remember to negate the direction (gradient points toward higher values)
+    // double vnorm = 0.1;
+    // pCell->position[0] -= pbm_grad_x[iy][ix] * dscale;   
+    // pCell->position[1] -= pbm_grad_y[iy][ix] * dscale;
+
+    // adopted from update_motility_vector (in core/PhysiCell_cell.cpp)
+
+    // choose a uniformly random unit vector 
+    double temp_angle = 6.28318530717959 * UniformRandom();
+    double temp_phi = 3.1415926535897932384626433832795 * UniformRandom();
+    
+    double sin_phi = sin(temp_phi);
+    double cos_phi = cos(temp_phi);
+    
+    if( phenotype.motility.restrict_to_2D == true )
+    { 
+        sin_phi = 1.0; 
+        cos_phi = 0.0;
+    }
+    
+    std::vector<double> dvec; 
+    dvec.resize(3,0.0); 
+    
+    // invert to point *to* PBM
+    // dvec[0] = -pbm_grad_x[iy][ix]; 
+    // dvec[1] = -pbm_grad_y[iy][ix]; 
+    dvec[0] = 0.0; 
+    dvec[1] = -1.0; 
+    dvec[2] = 0.0; //  assuming 2D model
+    
+    // if the update_bias_vector function is set, use it  
+    if( pCell->functions.update_migration_bias )
+    {
+        pCell->functions.update_migration_bias( pCell, phenotype, dt ); 
+    }
+    
+    phenotype.motility.motility_vector = phenotype.motility.migration_bias_direction; // motiltiy = bias_vector
+    phenotype.motility.motility_vector *= phenotype.motility.migration_bias; // motility = bias*bias_vector 
+
+    double one_minus_bias = 1.0 - phenotype.motility.migration_bias; 
+		
+    axpy( &(phenotype.motility.motility_vector), one_minus_bias, dvec ); // motility = (1-bias)*randvec + bias*bias_vector
+		
+    normalize( &(phenotype.motility.motility_vector) ); 
+		
+    phenotype.motility.motility_vector *= phenotype.motility.migration_speed;
+    pCell->update_motility_vector( dt );
+	return; 
+}
+
+void parietal_epithelial_mechanics_v0( Cell* pCell, Phenotype& phenotype, double dt )
 {
     static bool first_time = true;
 
