@@ -2,8 +2,10 @@
 
 void parietal_epithelial_mechanics( Cell* pCell, Phenotype& phenotype, double dt )
 {
-    static double R_a = parameters.doubles("R_a");  
     static int idx_attached = pCell->custom_data.find_variable_index( "attached" ); 
+    static int idx_attach_time = pCell->custom_data.find_variable_index( "attach_time" ); 
+    static double R_a = parameters.doubles("R_a");  
+    static double max_attach_time = parameters.doubles("max_attach_time");  
     static bool first_time = true;
 
     static double x_min = microenvironment.mesh.bounding_box[0]; 
@@ -14,16 +16,20 @@ void parietal_epithelial_mechanics( Cell* pCell, Phenotype& phenotype, double dt
 	static double y_max = microenvironment.mesh.bounding_box[4]; 
 	static double y_diff = microenvironment.mesh.bounding_box[4] - microenvironment.mesh.bounding_box[1]; 
 
+
     // std::cout << "------ parietal_epithelial_mechanics" << std::endl;
 
     double xpos = pCell->position[0];
     double ypos = pCell->position[1];
 
-    if (!(pCell->custom_data[idx_attached]))
+    if (pCell->custom_data[idx_attached] == 0.0)  // not attached (custom_data are double (or std::string))
     {
-        if (fabs(ypos) <  R_a)
+        if (fabs(ypos) <  R_a)  // within attachment radius
         {
             pCell->custom_data[idx_attached] = 1;
+            pCell->custom_data[idx_attach_time] = PhysiCell_globals.current_time;
+            // std::cout << " ------- attaching cell ID " << pCell->ID << "at time " << PhysiCell_globals.current_time << std::endl;
+            // std::cout << "          max_attach_time = " << max_attach_time << std::endl;
             // phenotype.motility.migration_speed = 0.0;
 		    // phenotype.motility.is_motile = false; 
 		    pCell->is_movable = false; 
@@ -31,9 +37,15 @@ void parietal_epithelial_mechanics( Cell* pCell, Phenotype& phenotype, double dt
             return;
         }
     }
-    else  //  it is already attached
+    else  //  it is attached
     {
-            return;
+        if ((PhysiCell_globals.current_time - pCell->custom_data[idx_attach_time]) > max_attach_time)
+        {
+            // std::cout << " detaching cell ID " << pCell->ID << "at time " << PhysiCell_globals.current_time << std::endl;
+            pCell->custom_data[idx_attached] = 0;  // mark as not attached
+		    pCell->is_movable = true; 
+        }
+        // return;
     }
 
     // if (first_time) 
@@ -72,7 +84,11 @@ void parietal_epithelial_mechanics( Cell* pCell, Phenotype& phenotype, double dt
     std::vector<double> dvec; 
     dvec.resize(3,0.0); 
     dvec[0] = 0.0; 
-    dvec[1] = -1.0; 
+    if (ypos > 0.0)
+        dvec[1] = -1.0; 
+    else
+        dvec[1] = 1.0;   // flip normal if on the other side of the membrane
+
     dvec[2] = 0.0; //  assuming 2D model
     
     // if the update_bias_vector function is set, use it  

@@ -13,7 +13,7 @@
     <use_2D>true</use_2D>
   </domain>
   <overall>
-    <max_time units="min">120</max_time>
+    <max_time units="min">720</max_time>
     <time_units>min</time_units>
     <space_units>micron</space_units>
     <dt_diffusion units="min">0.01</dt_diffusion>
@@ -162,6 +162,7 @@
         <cell_ID>0.0</cell_ID>
         <relative_adhesion_other_cell_types>1</relative_adhesion_other_cell_types>
         <relative_adhesion_other_cells>1</relative_adhesion_other_cells>
+        <attach_time>0.0</attach_time>
       </custom_data>
     </cell_definition>
     <cell_definition ID="2" name="parietal_epithelial">
@@ -256,6 +257,7 @@
         <cell_ID>0.0</cell_ID>
         <relative_adhesion_other_cell_types>1</relative_adhesion_other_cell_types>
         <relative_adhesion_other_cells>1</relative_adhesion_other_cells>
+        <attach_time>0.0</attach_time>
       </custom_data>
     </cell_definition>
   </cell_definitions>
@@ -269,6 +271,7 @@
     <random_seed description="" type="int" units="dimensionless">0</random_seed>
     <mechanics_voxel_size description="edge length of mechanics voxel. Set ~2 x agent radius x max relative interaction distance (default: 30)" type="double" units="micron">15</mechanics_voxel_size>
     <R_a description="adhesion radius (to membrane)" type="double" units="micron">1.0</R_a>
+    <max_attach_time description="attachment time to membrane" type="double" units="min">10.0</max_attach_time>
     <!--
     <pbm_gbm_distance_file  type="string">./config/pbm_gbm_dist.dat</pbm_gbm_distance_file>
     <vessels_distance_file  type="string">./config/vessels4_dist.dat</vessels_distance_file>
