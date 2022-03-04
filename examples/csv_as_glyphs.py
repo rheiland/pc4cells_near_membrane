@@ -38,9 +38,9 @@ def main():
     colors = vtkNamedColors()
 
     points = vtkPoints()
-    points.InsertNextPoint(0, 0, 0)
-    points.InsertNextPoint(1, 1, 1)
-    points.InsertNextPoint(2, 2, 2)
+    # points.InsertNextPoint(0, 0, 0)
+    # points.InsertNextPoint(1, 1, 1)
+    # points.InsertNextPoint(2, 2, 2)
     cellID = vtkFloatArray()
     cellVolume = vtkFloatArray()
     for idx in range(ncells):
@@ -106,21 +106,25 @@ def main():
 
     actor = vtkActor()
     actor.SetMapper(mapper)
-    actor.GetProperty().SetInterpolationToPBR()
+#    actor.GetProperty().SetInterpolationToPBR()
     # actor.GetProperty().SetColor(colors.GetColor3d('Salmon'))
     print("-- actor defaults:")
+    print("-- ambient:",actor.GetProperty().GetAmbient())  # 1.0
     print("-- diffuse:",actor.GetProperty().GetDiffuse())  # 1.0
     print("-- specular:",actor.GetProperty().GetSpecular())  # 0.0
     print("-- roughness:",actor.GetProperty().GetCoatRoughness ())  # 0.0
-    actor.GetProperty().SetDiffuse(0.5)
     # actor.GetProperty().SetSpecular(0.2)
-    actor.GetProperty().SetCoatRoughness (0.5)
-    actor.GetProperty().SetCoatRoughness (0.2)
-    actor.GetProperty().SetCoatRoughness (1.0)
+#    actor.GetProperty().SetCoatRoughness (0.5)
+#    actor.GetProperty().SetCoatRoughness (0.2)
+#    actor.GetProperty().SetCoatRoughness (1.0)
+
+    actor.GetProperty().SetDiffuse(0.8)
+    actor.GetProperty().SetSpecular(0.05)
+#    actor.GetProperty().SetAmbient(0.2)  # 1.0
 
     renderer = vtkRenderer()
-    amval = 1.0  # default
-    renderer.SetAmbient(amval, amval, amval)
+    amval = 0.9  # default
+#    renderer.SetAmbient(amval, amval, amval)
 
     renderWindow = vtkRenderWindow()
     renderWindow.SetPosition(100,100)
