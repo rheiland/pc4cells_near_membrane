@@ -145,6 +145,10 @@ class Vis(QWidget):
         # w.textChanged.connect(self.output_dir_changed)
         controls_hbox.addWidget(self.output_dir_w)
 
+        self.first_button = QPushButton("<<")
+        self.first_button.clicked.connect(self.first_plot_cb)
+        controls_hbox.addWidget(self.first_button)
+
         self.back_button = QPushButton("<")
         self.back_button.clicked.connect(self.back_plot_cb)
         controls_hbox.addWidget(self.back_button)
@@ -443,6 +447,14 @@ class Vis(QWidget):
     # def output_dir_changed(self, text):
     #     self.output_dir = text
     #     print(self.output_dir)
+
+    def first_plot_cb(self, text):
+        if self.reset_model_flag:
+            self.reset_model()
+            self.reset_model_flag = False
+
+        self.current_svg_frame = 0
+        self.update_plots()
 
     def back_plot_cb(self, text):
         if self.reset_model_flag:
